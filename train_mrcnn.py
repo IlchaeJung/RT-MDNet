@@ -291,7 +291,7 @@ def train_mdnet():
                 opts['model_path'] = './models/tmp_model.pth'
                 if (pretrain_opts['set_type'] == 'VOT') or (pretrain_opts['set_type'] == 'IMAGENET'):
                     opts['set_type'] = 'OTB'
-                    seqs = ['Freeman4','Human5','Human3','Matrix','Ironman','Rubik','FaceOcc2','Woman','Singer2','Basketball', 'Skating1', 'MotorRolling', 'Panda', 'Coupon', 'Soccer', 'Bolt', 'Bolt2', 'BlurOwl', 'CarScale','Sylvester']
+                    seqs = ['Liquor','Toy','Freeman4','Human5','Human3','Matrix','Ironman','Rubik','FaceOcc2','Woman','Singer2','Basketball', 'Skating1', 'MotorRolling', 'Panda', 'Coupon', 'Soccer', 'Bolt', 'Bolt2', 'BlurOwl', 'CarScale','Sylvester','Football']
                     seq_home = '/home/ilchae/dataset/tracking/OTB'
                     seq_list = [seq_home + '/' + p for p in seqs]
                 total_iou = []

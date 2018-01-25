@@ -156,6 +156,8 @@ def run_mdnet(img_list, init_bbox, gt=None, savefig_dir='', display=False):
         # model.roi_align_model = RoIAlignDenseAdaMax(align_h, align_w, spatial_s)
     if opts['use_gpu']:
         model = model.cuda()
+        #torch.backends.cudnn.benchmark = True
+
     model.set_learnable_params(opts['ft_layers'])
 
     # Init image crop model
@@ -192,10 +194,10 @@ def run_mdnet(img_list, init_bbox, gt=None, savefig_dir='', display=False):
     # plt.show()
 
     # compute padded sample
-    padded_x1 = neg_examples[:,0].min()
-    padded_y1 = neg_examples[:,1].min()
-    padded_x2 = (neg_examples[:,0]+neg_examples[:,2]).max()
-    padded_y2 = (neg_examples[:,1]+neg_examples[:,3]).max()
+    padded_x1 = (neg_examples[:,0]-neg_examples[:,2]*(opts['padding']-1.)/2.).min()
+    padded_y1 = (neg_examples[:,1]-neg_examples[:,3]*(opts['padding']-1.)/2.).min()
+    padded_x2 = (neg_examples[:,0]+neg_examples[:,2]*(opts['padding']+1.)/2.).max()
+    padded_y2 = (neg_examples[:,1]+neg_examples[:,3]*(opts['padding']+1.)/2.).max()
     padded_scene_box = np.reshape(np.asarray((padded_x1,padded_y1,padded_x2-padded_x1,padded_y2-padded_y1)),(1,4))
 
     scene_boxes = np.reshape(np.copy(padded_scene_box), (1,4))
@@ -222,6 +224,7 @@ def run_mdnet(img_list, init_bbox, gt=None, savefig_dir='', display=False):
     else:
         jitter_scale = [1.]
 
+    model.eval()
     for bidx in range(0,scene_boxes.shape[0]):
         crop_img_size = (scene_boxes[bidx,2:4] * ((opts['img_size'],opts['img_size'])/target_bbox[2:4])).astype('int64')*jitter_scale[bidx]
         cropped_image, cur_image_var = img_crop_model.crop_image(cur_image, np.reshape(scene_boxes[bidx],(1,4)), crop_img_size)
@@ -371,10 +374,10 @@ def run_mdnet(img_list, init_bbox, gt=None, savefig_dir='', display=False):
         ishape = cur_image.shape
         samples = gen_samples(SampleGenerator('gaussian', (ishape[1], ishape[0]), trans_f, opts['scale_f'],valid=True), target_bbox, opts['n_samples'])
 
-        padded_x1 = samples[:, 0].min()
-        padded_y1 = samples[:, 1].min()
-        padded_x2 = (samples[:, 0] + samples[:, 2]).max()
-        padded_y2 = (samples[:, 1] + samples[:, 3]).max()
+        padded_x1 = (samples[:, 0] - samples[:, 2]*(opts['padding']-1.)/2.).min()
+        padded_y1 = (samples[:, 1] - samples[:,3]*(opts['padding']-1.)/2.).min()
+        padded_x2 = (samples[:, 0] + samples[:, 2]*(opts['padding']+1.)/2.).max()
+        padded_y2 = (samples[:, 1] + samples[:, 3]*(opts['padding']+1.)/2.).max()
         padded_scene_box = np.asarray((padded_x1, padded_y1, padded_x2 - padded_x1, padded_y2 - padded_y1))
 
 
@@ -427,10 +430,10 @@ def run_mdnet(img_list, init_bbox, gt=None, savefig_dir='', display=False):
         if (success>0) and opts['multi_scale_infer']:
             samples = gen_samples(SampleGenerator('gaussian', (ishape[1], ishape[0]), 0.2, opts['scale_f'], valid=True), target_bbox,32)
 
-            padded_x1 = samples[:, 0].min()
-            padded_y1 = samples[:, 1].min()
-            padded_x2 = (samples[:, 0] + samples[:, 2]).max()
-            padded_y2 = (samples[:, 1] + samples[:, 3]).max()
+            padded_x1 = (samples[:, 0] - samples[:, 2] * (opts['padding'] - 1.) / 2.).min()
+            padded_y1 = (samples[:, 1] - samples[:, 3] * (opts['padding'] - 1.) / 2.).min()
+            padded_x2 = (samples[:, 0] + samples[:, 2] * (opts['padding'] + 1.) / 2.).max()
+            padded_y2 = (samples[:, 1] + samples[:, 3] * (opts['padding'] + 1.) / 2.).max()
             padded_scene_box = np.asarray((padded_x1, padded_y1, padded_x2 - padded_x1, padded_y2 - padded_y1))
 
             if padded_scene_box[0] > cur_image.shape[1]:
@@ -443,7 +446,7 @@ def run_mdnet(img_list, init_bbox, gt=None, savefig_dir='', display=False):
                 padded_scene_box[3] = -padded_scene_box[1] + 1
 
             multi_scales = [1.05**(-2), 1.05**(-1), 1.05**1,1.05**2]
-            coarse_target_bbox = target_bbox
+            coarse_target_bbox = np.copy(target_bbox)
             for midx in range(len(multi_scales)):
                 crop_img_size = multi_scales[midx]*(padded_scene_box[2:4] * ((opts['img_size'], opts['img_size']) / coarse_target_bbox[2:4])).astype('int64')
                 cropped_image, cur_image_var = img_crop_model.crop_image(cur_image, np.reshape(padded_scene_box, (1, 4)),crop_img_size)
@@ -460,7 +463,7 @@ def run_mdnet(img_list, init_bbox, gt=None, savefig_dir='', display=False):
                 sample_rois = np.copy(samples)
                 sample_rois[:, 0:2] -= np.repeat(np.reshape(padded_scene_box[0:2], (1, 2)), sample_rois.shape[0], axis=0)
                 scaled_obj_size = multi_scales[midx] * opts['img_size']
-                sample_rois = samples2maskroi(sample_rois, model.receptive_field, (scaled_obj_size, scaled_obj_size),target_bbox[2:4], opts['padding'])
+                sample_rois = samples2maskroi(sample_rois, model.receptive_field, (scaled_obj_size, scaled_obj_size),coarse_target_bbox[2:4], opts['padding'])
                 sample_rois = np.concatenate((batch_num, sample_rois), axis=1)
                 sample_rois = Variable(torch.from_numpy(sample_rois.astype('float32'))).cuda()
                 sample_feats = model.roi_align_model(feat_map, sample_rois)
@@ -473,6 +476,17 @@ def run_mdnet(img_list, init_bbox, gt=None, savefig_dir='', display=False):
                 if cur_target_score > target_score:
                     target_score = cur_target_score
                     target_bbox = samples[top_idx].mean(axis=0)
+
+                # fig1,ax1 = plt.subplots(1)
+                # ax1.imshow(np.squeeze(cropped_image.data.cpu().numpy().transpose(0, 2, 3, 1).astype('uint8')+128))
+                # for sidx in range(0,samples.shape[0]-1):
+                #     rect = patches.Rectangle((sample_rois.data[sidx,1:3]), sample_rois.data[sidx,3] - sample_rois.data[sidx,1]+model.receptive_field, sample_rois.data[sidx,4] - sample_rois.data[sidx,2]+model.receptive_field, linewidth=1, edgecolor='r',
+                #                              facecolor='none')
+                #     ax1.add_patch(rect)
+                # plt.draw()
+                # plt.show()
+                #
+                # print('debug')
 
             success = target_score > opts['success_thr']
 
@@ -531,10 +545,10 @@ def run_mdnet(img_list, init_bbox, gt=None, savefig_dir='', display=False):
                 opts['n_neg_update'],
                 opts['overlap_neg_update'])
 
-            padded_x1 = neg_examples[:, 0].min()
-            padded_y1 = neg_examples[:, 1].min()
-            padded_x2 = (neg_examples[:, 0] + neg_examples[:, 2]).max()
-            padded_y2 = (neg_examples[:, 1] + neg_examples[:, 3]).max()
+            padded_x1 = (neg_examples[:, 0] - neg_examples[:, 2] * (opts['padding'] - 1.) / 2.).min()
+            padded_y1 = (neg_examples[:, 1] - neg_examples[:, 3] * (opts['padding'] - 1.) / 2.).min()
+            padded_x2 = (neg_examples[:, 0] + neg_examples[:, 2] * (opts['padding'] + 1.) / 2.).max()
+            padded_y2 = (neg_examples[:, 1] + neg_examples[:, 3] * (opts['padding'] + 1.) / 2.).max()
             padded_scene_box = np.reshape(np.asarray((padded_x1, padded_y1, padded_x2 - padded_x1, padded_y2 - padded_y1)),(1,4))
 
             scene_boxes = np.reshape(np.copy(padded_scene_box), (1, 4))

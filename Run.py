@@ -7,6 +7,9 @@ import argparse
 
 import pickle
 
+
+
+
 def genConfig(seq_path, set_type):
 
     path, seqname = os.path.split(seq_path)

@@ -10,7 +10,7 @@ import numpy as np
 def overlap_ratio(rect1, rect2):
     '''
     Compute overlap ratio between two rects
-    - rect: 1d array of [x,y,w,h] or 
+    - rect: 1d array of [x,y,w,h] or
             2d array of N x [x,y,w,h]
     '''
 
@@ -42,13 +42,13 @@ def crop_image(img, bbox, img_size=[107,107], padding=16, valid=False):
         pad_h = padding * h/img_size[1]
         half_w += pad_w
         half_h += pad_h
-        
+
     img_h, img_w, _ = img.shape
     min_x = int(center_x - half_w + 0.5)
     min_y = int(center_y - half_h + 0.5)
     max_x = int(center_x + half_w + 0.5)
     max_y = int(center_y + half_h + 0.5)
-    
+
     if valid:
         min_x = max(0, min_x)
         min_y = max(0, min_y)
@@ -63,11 +63,11 @@ def crop_image(img, bbox, img_size=[107,107], padding=16, valid=False):
         min_y_val = max(0, min_y)
         max_x_val = min(img_w, max_x)
         max_y_val = min(img_h, max_y)
-        
+
         cropped = 128 * np.ones((max_y-min_y, max_x-min_x, 3), dtype='uint8')
         cropped[min_y_val-min_y:max_y_val-min_y, min_x_val-min_x:max_x_val-min_x, :] \
             = img[min_y_val:max_y_val, min_x_val:max_x_val, :]
-    
+
     scaled = imresize(cropped, (img_size[1],img_size[0]))
     return scaled
 
@@ -90,7 +90,8 @@ def samples2maskroi(samples,receptive_field, cshape,padded_scene_size,padding_ra
 
     rois[:, 0] *= cur_resize_ratio[0]
     rois[:, 1] *= cur_resize_ratio[1]
-    rois[:, 2] = rois[:, 2]*cur_resize_ratio[0] - receptive_field
-    rois[:, 3] = rois[:, 3]*cur_resize_ratio[1] - receptive_field
+    rois[:, 2] = np.maximum(rois[:,0]+1,rois[:, 2]*cur_resize_ratio[0] - receptive_field)
+    rois[:, 3] = np.maximum(rois[:,1]+1,rois[:, 3]*cur_resize_ratio[1] - receptive_field)
+
 
     return rois

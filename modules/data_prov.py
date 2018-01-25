@@ -388,10 +388,10 @@ class RegionDataset4TripleNetEfficient(data.Dataset):
             neg_examples = gen_samples(SampleGenerator('uniform', (ishape[1],ishape[0]), 1, 1.2, 1.1, False), bbox, n_neg, overlap_range=self.overlap_neg)
 
             # compute padded sample
-            padded_x1 = neg_examples[:, 0].min()
-            padded_y1 = neg_examples[:, 1].min()
-            padded_x2 = (neg_examples[:, 0] + neg_examples[:, 2]).max()
-            padded_y2 = (neg_examples[:, 1] + neg_examples[:, 3]).max()
+            padded_x1 = (neg_examples[:, 0]-neg_examples[:,2]*(pretrain_opts['padding']-1.)/2.).min()
+            padded_y1 = (neg_examples[:, 1]-neg_examples[:,3]*(pretrain_opts['padding']-1.)/2.).min()
+            padded_x2 = (neg_examples[:, 0] + neg_examples[:, 2]*(pretrain_opts['padding']+1.)/2.).max()
+            padded_y2 = (neg_examples[:, 1] + neg_examples[:, 3]*(pretrain_opts['padding']+1.)/2.).max()
             padded_scene_box = np.asarray((padded_x1, padded_y1, padded_x2 - padded_x1, padded_y2 - padded_y1))
 
             # jitter_scale = 1.05 ** np.clip(0.5*np.random.randn(1,1),-2,2)
@@ -430,6 +430,16 @@ class RegionDataset4TripleNetEfficient(data.Dataset):
             #     rect = patches.Rectangle((pos_rois[sidx,1:3]),pos_rois[sidx,3]-pos_rois[sidx,1]+self.receptive_field, pos_rois[sidx,4]-pos_rois[sidx,2]+self.receptive_field, linewidth=1, edgecolor='r',
             #                          facecolor='none')
             #     ax1.add_patch(rect)
+            # plt.draw()
+            # plt.show()
+            #
+            #
+            # fig2,ax2 = plt.subplots(1)
+            # ax2.imshow(np.squeeze(cropped_image.cpu().numpy().astype('uint8').transpose(2,3,1,0))+128)
+            # for sidx in range(0,neg_rois.shape[0]-1):
+            #     rect = patches.Rectangle((neg_rois[sidx,1:3]),neg_rois[sidx,3]-neg_rois[sidx,1]+self.receptive_field, neg_rois[sidx,4]-neg_rois[sidx,2]+self.receptive_field, linewidth=1, edgecolor='r',
+            #                          facecolor='none')
+            #     ax2.add_patch(rect)
             # plt.draw()
             # plt.show()
 

@@ -101,8 +101,9 @@ class MDNet(nn.Module):
                                         # nn.MaxPool2d(kernel_size=3, stride=2)
                                         )),
 
-                ('conv3', nn.Sequential(nn.Conv2d(256, 512, kernel_size=3, stride=1,dilation=2),
-                                        nn.ReLU()
+                ('conv3', nn.Sequential(nn.Conv2d(256, 512, kernel_size=3, stride=1,dilation=3),
+                                        nn.ReLU(),
+                                        # LRN(),
                                         )),
                 ('fc4',   nn.Sequential(
                                         nn.Linear(512 * 3 * 3, 512),
@@ -117,7 +118,7 @@ class MDNet(nn.Module):
 
         self.roi_align_model = RoIAlignMax(3, 3, 1. / 8)
 
-        self.receptive_field = 59.  # it is receptive fieald that a element of feat_map covers. feat_map is bottom layer of ROI_align_layer
+        self.receptive_field = 75.  # it is receptive fieald that a element of feat_map covers. feat_map is bottom layer of ROI_align_layer
 
         if model_path is not None:
             if os.path.splitext(model_path)[1] == '.pth':
@@ -156,6 +157,9 @@ class MDNet(nn.Module):
 
         run = False
         for name, module in self.layers.named_children():
+            # torch.cuda.synchronize()
+            # tic = time.time()
+
             if name == in_layer:
                 run = True
             if run:
@@ -164,6 +168,9 @@ class MDNet(nn.Module):
                 #     x = x.view(x.size(0),-1)
                 if name == out_layer:
                     return x
+
+            # torch.cuda.synchronize()
+            # print('%s_time : %f' % (name, time.time()-tic))
 
         x = self.branches[k](x)
         if out_layer=='fc6':
