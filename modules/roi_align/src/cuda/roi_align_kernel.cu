@@ -229,11 +229,13 @@ extern "C" {
             } else {
                 for(int hidx=0; hidx<=stride_h; hidx+=stride_h){
                     for(int widx=0; widx<=stride_w; widx+=stride_w){
+                        if( ((widx+wstart)>=0) && ((widx+wstart)<width) && ((hidx+hstart)>=0) && ((hidx+hstart)<height) ){
                         int cur_loc = img_start + (c * height + hstart) * width + wstart + hidx*width + widx;
                         float h_ratio = 1. - (float)fabsf(h-hstart-hidx)/(float)stride_h;
                         float w_ratio = 1. - (float)fabsf(w-wstart-widx)/(float)stride_w;
 
                         top_data[index]+=bottom_data[cur_loc]*h_ratio*w_ratio;
+                        }
                     }
                 }
             }
@@ -301,11 +303,13 @@ extern "C" {
             if (!(h < 0 || h >= height || w < 0 || w >= width)) {
                 for(int hidx=0; hidx<=stride_h; hidx+=stride_h){
                     for(int widx=0; widx<=stride_w; widx+=stride_w){
+                        if( ((hstart+hidx)>=0) && ((hstart+hidx)<height) && ((wstart+widx)>=0) && ((wstart+widx)<width) ){
                         int cur_loc = img_start + (c * height + hstart) * width + wstart + hidx*width + widx;
                         float h_ratio = 1. - (float)fabsf(h-hstart-hidx)/(float)(stride_h);
                         float w_ratio = 1. - (float)fabsf(w-wstart-widx)/(float)(stride_w);
 
                         atomicAdd(bottom_diff + cur_loc, top_diff[index]*h_ratio*w_ratio);
+                        }
                     }
                 }
             }
