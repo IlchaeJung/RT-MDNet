@@ -29,8 +29,6 @@ for i,seqname in enumerate(seq_list):
         seq_path = seq_home+seqname
         img_list = sorted([p for p in os.listdir(seq_path+'/img') if os.path.splitext(p)[1] == '.jpg'])
 
-
-
         if (seqname == 'Jogging') or (seqname == 'Skating2'):
             gt = np.loadtxt(seq_path + '/groundtruth_rect.1.txt')
         elif seqname == 'Human4' :
@@ -60,7 +58,7 @@ for i,seqname in enumerate(seq_list):
         gt = []
 
     assert len(img_list) == len(gt), "Lengths do not match!!"
-    
+
     if gt.shape[1]==8:
         x_min = np.min(gt[:,[0,2,4,6]],axis=1)[:,None]
         y_min = np.min(gt[:,[1,3,5,7]],axis=1)[:,None]

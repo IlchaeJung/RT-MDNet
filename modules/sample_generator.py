@@ -4,10 +4,10 @@ from PIL import Image
 from utils import *
 
 def gen_samples(generator, bbox, n, overlap_range=None, scale_range=None):
-    
+
     if overlap_range is None and scale_range is None:
         return generator(bbox, n)
-    
+
     else:
         samples = None
         remain = n
@@ -22,7 +22,7 @@ def gen_samples(generator, bbox, n, overlap_range=None, scale_range=None):
             if scale_range is not None:
                 s = np.prod(samples_[:,2:], axis=1) / np.prod(bbox[2:])
                 idx *= (s >= scale_range[0]) * (s <= scale_range[1])
-            
+
             samples_ = samples_[idx,:]
             samples_ = samples_[:min(remain, len(samples_))]
             if samples is None:
@@ -31,7 +31,7 @@ def gen_samples(generator, bbox, n, overlap_range=None, scale_range=None):
                 samples = np.concatenate([samples, samples_])
             remain = n - len(samples)
             factor = factor*2
-        
+
         return samples
 
 
@@ -66,17 +66,16 @@ class SampleGenerator():
         elif self.type=='uniform':
             samples[:,:2] += self.trans_f * np.mean(bb[2:]) * (np.random.rand(n,2)*2-1)
             samples[:,2:] *= self.scale_f ** (np.random.rand(n,1)*2-1)
-        
+
         elif self.type=='whole':
             m = int(2*np.sqrt(n))
             xy = np.dstack(np.meshgrid(np.linspace(0,1,m),np.linspace(0,1,m))).reshape(-1,2)
             xy = np.random.permutation(xy)[:n]
             samples[:,:2] = bb[2:]/2 + xy * (self.img_size-bb[2:]/2-1)
-            #samples[:,:2] = bb[2:]/2 + np.random.rand(n,2) * (self.img_size-bb[2:]/2-1)
             samples[:,2:] *= self.scale_f ** (np.random.rand(n,1)*2-1)
 
         # adjust bbox range
-        samples[:,2:] = np.clip(samples[:,2:], 10, self.img_size-10)
+        samples[:,2:] = np.clip(samples[:,2:], 5, self.img_size-5.)
         if self.valid:
             samples[:,:2] = np.clip(samples[:,:2], samples[:,2:]/2, self.img_size-samples[:,2:]/2-1)
         else:
@@ -89,7 +88,7 @@ class SampleGenerator():
 
     def set_trans_f(self, trans_f):
         self.trans_f = trans_f
-    
+
     def get_trans_f(self):
         return self.trans_f
 

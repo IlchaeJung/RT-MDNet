@@ -78,11 +78,6 @@ class imgCropper(nn.Module):
         cropped_images = self.forward(cur_images, sample_rois)
 
 
-        # fig1,ax1 = plt.subplots(1)
-        # for i in range(0,cropped_images.size(0)):
-        #     ax1.imshow(cropped_images[i,:,:,:].data.cpu().numpy().transpose(1,2,0).astype('uint8'))
-        #     plt.show()
-
         return cropped_images
 
 

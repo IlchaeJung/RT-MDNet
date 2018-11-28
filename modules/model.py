@@ -29,34 +29,6 @@ def append_params(params, module, prefix):
             else:
                 raise RuntimeError("Duplicated param name: %s" % (name))
 
-
-# class LRN(nn.Module):
-#     def __init__(self):
-#         super(LRN, self).__init__()
-#
-#     def forward(self, x):
-#         #
-#         # x: N x C x H x W
-#
-#         # torch.cuda.synchronize()
-#         # tic = time.time()
-#
-#         pad = Variable(x.data.new(x.size(0), 1, 1, x.size(2), x.size(3)).zero_())
-#         x_sq = (x**2).unsqueeze(dim=1)
-#         x_tile = torch.cat((torch.cat((x_sq,pad,pad,pad,pad),2),
-#                             torch.cat((pad,x_sq,pad,pad,pad),2),
-#                             torch.cat((pad,pad,x_sq,pad,pad),2),
-#                             torch.cat((pad,pad,pad,x_sq,pad),2),
-#                             torch.cat((pad,pad,pad,pad,x_sq),2)),1)
-#         x_sumsq = x_tile.sum(dim=1).squeeze(dim=1)[:,2:-2,:,:]
-#         x = x / ((2.+0.0001*x_sumsq)**0.75)
-#
-#         # torch.cuda.synchronize()
-#         # print('lrn_time : %f' % (time.time()-tic))
-#
-#         return x
-
-
 class LRN(nn.Module):
     def __init__(self, local_size=1, alpha=0.0001, beta=0.75, ACROSS_CHANNELS=False):
         super(LRN, self).__init__()
@@ -98,12 +70,10 @@ class MDNet(nn.Module):
                 ('conv2', nn.Sequential(nn.Conv2d(96, 256, kernel_size=5, stride=2,dilation=1),
                                         nn.ReLU(),
                                         LRN(),
-                                        # nn.MaxPool2d(kernel_size=3, stride=2)
                                         )),
 
                 ('conv3', nn.Sequential(nn.Conv2d(256, 512, kernel_size=3, stride=1,dilation=3),
                                         nn.ReLU(),
-                                        # LRN(),
                                         )),
                 ('fc4',   nn.Sequential(
                                         nn.Linear(512 * 3 * 3, 512),
@@ -113,7 +83,6 @@ class MDNet(nn.Module):
                                         nn.ReLU()))]))
 
         self.branches = nn.ModuleList([nn.Sequential(nn.Dropout(0.5),
-                                                     # nn.Conv2d(512, 2, kernel_size=1, stride=1)) for _ in range(K)])
                                                      nn.Linear(512, 2)) for _ in range(K)])
 
         self.roi_align_model = RoIAlignMax(3, 3, 1. / 8)
@@ -152,25 +121,16 @@ class MDNet(nn.Module):
         return params
 
     def forward(self, x, k=0, in_layer='conv1', out_layer='fc6'):
-        #
-        # forward model from in_layer to out_layer
 
         run = False
         for name, module in self.layers.named_children():
-            # torch.cuda.synchronize()
-            # tic = time.time()
-
             if name == in_layer:
                 run = True
             if run:
                 x = module(x)
-                # if name == 'conv3':
-                #     x = x.view(x.size(0),-1)
                 if name == out_layer:
                     return x
 
-            # torch.cuda.synchronize()
-            # print('%s_time : %f' % (name, time.time()-tic))
 
         x = self.branches[k](x)
         if out_layer=='fc6':
@@ -232,32 +192,4 @@ class Precision():
         return prec.data[0]
 
 
-##==========================ilchae===================================##
-class TripleLoss(nn.Module):
-    def __init__(self, margin_):
-        super(TripleLoss, self).__init__()
-        self.margin = margin_
-
-    def forward(self,anchor, pos, neg):
-        anchor = anchor + 1e-11
-        anchor_norm = torch.norm(anchor,p=2,dim=1).view(anchor.size(0),1)
-        anchor_ = anchor / anchor_norm.expand_as(anchor)
-
-        pos = pos + 1e-7
-        pos_norm = torch.norm(pos, p=2, dim=1).view(anchor.size(0),1)
-        pos_ = pos / pos_norm.expand_as(pos)
-
-        neg = neg + 1e-7
-        neg_norm = torch.norm(neg, p=2, dim=1).view(anchor.size(0),1)
-        neg_ = neg / neg_norm.expand_as(neg)
-
-        elem_loss = anchor_ * (neg_ - pos_)
-        loss = torch.sum(elem_loss, dim = 1)
-        loss = F.relu(loss + self.margin)
-        loss = torch.mean(loss)
-
-        if loss.data[0] < 1e-5:
-            print 'fuck'
-
-        return loss
 

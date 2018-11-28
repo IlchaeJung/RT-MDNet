@@ -12,16 +12,9 @@ import matplotlib.patches as patches
 from PIL import Image
 import time
 
-# seq_home = '../dataset/'
-# seqlist_path = '../vot-otb.txt'
-# output_path = './imagenet_arrange.pkl'
-
 output_path = './imagenet_refine.pkl'
 
 
-
-#with open(seqlist_path,'r') as fp:
-#    seq_list = fp.read().splitlines()
 
 seq_home = '/home/ilchae/dataset/ILSVRC/'
 train_list = [p for p in os.listdir(seq_home + 'Data/VID/train')]
@@ -40,7 +33,9 @@ for i,seqname in enumerate(seq_list):
     gt_path = seq_home +'Annotations/VID/train/' + seqname
     img_list = sorted([p for p in os.listdir(seq_path) if os.path.splitext(p)[1] == '.JPEG'])
 
-    gt = np.zeros((len(img_list),4))
+    # gt = np.zeros((len(img_list),4))
+    enable_gt = []
+    enable_img_list = []
     gt_list = sorted([gt_path + '/' + p for p in os.listdir(gt_path) if os.path.splitext(p)[1] == '.xml'])
     save_enable = True
     for gidx in range(0,len(img_list)):
@@ -53,38 +48,39 @@ for i,seqname in enumerate(seq_list):
                 object = doc['annotation']['object']
         except:
             ## no object, occlusion and hidden etc.
-            save_enable = False
+            continue
+
         if (int(object['trackid']) is not 0):
-            save_enable = False
-            break
+            continue
+
         xmin = float(object['bndbox']['xmin'])
         xmax = float(object['bndbox']['xmax'])
         ymin = float(object['bndbox']['ymin'])
         ymax = float(object['bndbox']['ymax'])
 
         ## discard too big object
-        if (float(doc['annotation']['size']['width'])/2. < (xmax-xmin) ) and (float(doc['annotation']['size']['height'])>2. < (ymax-ymin) ): 
-            save_enable = False
-            break
-        gt[gidx,0] = xmin
-        gt[gidx,1] = ymin
-        gt[gidx,2] = xmax - xmin
-        gt[gidx,3] = ymax - ymin
+        if ((float(doc['annotation']['size']['width'])/2.) < (xmax-xmin) ) and ((float(doc['annotation']['size']['height'])/2.) < (ymax-ymin) ):
+            continue
 
+        # gt[gidx,0] = xmin
+        # gt[gidx,1] = ymin
+        # gt[gidx,2] = xmax - xmin
+        # gt[gidx,3] = ymax - ymin
 
-        # ax.cla()
-        # img = np.array(Image.open(seq_path + '/'+img_list[gidx]), dtype=np.uint8)
-        # ax.imshow(img)
-        # box = patches.Rectangle(gt[gidx,0:2],gt[gidx,2],gt[gidx,3], linewidth=1, edgecolor ='r', facecolor = 'none')
-        # ax.add_patch(box)
-        # plt.draw()
-        # plt.show()
-        # time.sleep(1)
+        cur_gt = np.zeros((4))
+        cur_gt[0] = xmin
+        cur_gt[1] = ymin
+        cur_gt[2] = xmax - xmin
+        cur_gt[3] = ymax - ymin
+        enable_gt.append(cur_gt)
 
+        enable_img_list.append(img_list[gidx])
 
+    if len(enable_img_list) == 0:
+        save_enable = False
     if save_enable:
-        assert len(img_list) == len(gt), "Lengths do not match!!"
-        data[seqname] = {'images':img_list, 'gt':gt}
+        assert len(enable_img_list) == len(enable_gt), "Lengths do not match!!"
+        data[seqname] = {'images':enable_img_list, 'gt':np.asarray(enable_gt)}
         completeNum += 1
         print 'Complete!'
 
