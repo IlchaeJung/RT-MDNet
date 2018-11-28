@@ -3,23 +3,14 @@ from collections import OrderedDict
 opts = OrderedDict()
 opts['use_gpu'] = True
 
-# opts['model_path'] = './models/imagenet-vgg-m.mat'
-# opts['model_path'] = './models/mdnet_otb-vot_new_clip10_batch16_x2_pad18_triple.pth'
-# opts['model_path'] = './models/mdnet_otb-vot_new_clip10_batch16_x2_pad18_triple_decaying.pth'
-# opts['model_path'] = './models/mdnet_otb-vot_new_clip10_batch16_x2_pad18.pth'
-# opts['model_path'] = './models/mdnet_otb-vot_new_clip1.pth'
 
+opts['model_path'] = './models/model_imagenet_seqbatch50_final.pth'
 
-# opts['model_path'] = './models/mdnet_vot-otb_new_clip10_batch16_x2_pad18_triple_decaying.pth'
-
-# opts['model_path'] = './models/mdnet_otb-vot_new_clip10_batch16_x2_pad14_triple_decaying.pth'
-
-opts['model_path'] = './models/mdnet_otb-vot_new_clip10_batch8_x2_pad14_triple_decaying_new_align2.pth'
-
-opts['img_size'] = 107 # original = 107
-# opts['padding'] = 16
-
-
+opts['img_size'] = 107
+opts['padding'] = 1.2
+opts['jitter'] = True
+opts['result_path']='./result.npy'
+opts['adaptive_align']=True
 opts['batch_pos'] = 32
 opts['batch_neg'] = 96
 opts['batch_neg_cand'] = 1024
@@ -35,7 +26,7 @@ opts['overlap_bbreg'] = [0.6, 1]
 opts['scale_bbreg'] = [1, 2]
 
 opts['lr_init'] = 0.0001 # original = 0.0001
-opts['maxiter_init'] = 30 # original = 30
+opts['maxiter_init'] = 50 # original = 30
 opts['n_pos_init'] = 500
 opts['n_neg_init'] = 5000
 opts['overlap_pos_init'] = [0.7, 1]
@@ -48,7 +39,7 @@ opts['n_neg_update'] = 200
 opts['overlap_pos_update'] = [0.7, 1]
 opts['overlap_neg_update'] = [0, 0.3]
 
-opts['success_thr'] = 0
+opts['success_thr'] = 0. # original = 0
 opts['n_frames_short'] = 20
 opts['n_frames_long'] = 100
 opts['long_interval'] = 10
@@ -61,7 +52,5 @@ opts['ft_layers'] = ['fc']
 
 
 
-##################################### from RCNN #############################################
-opts['padding'] = 1.2
-opts['padding_ratio']=5. # original = 5
-opts['padded_img_size'] = opts['img_size']*int(opts['padding_ratio'])
+
+
