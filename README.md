@@ -23,19 +23,25 @@ Check LICENSE file for details.
 
 ### System Requirements
 
-This code is tested on 64 bit Linux (Ubuntu 14.04 LTS).
+This code is tested on 64 bit Linux (Ubuntu 16.04 LTS).
 
 **Prerequisites** 
-  0. MATLAB (tested with R2014a)
-  0. MatConvNet (tested with version 1.0-beta10, included in this repository)
-  0. For GPU support, a GPU (~2GB memory) and CUDA toolkit according to the [MatConvNet installation guideline](http://www.vlfeat.org/matconvnet/install/) will be needed.
-0. Pre-requisite \newline
-0.1. Pre-training Datasets 
-ImageNet-Vid: 
+  0. PyTorch (>= 0.2.1)
+  0. For GPU support, a GPU (~2GB memory for test) and CUDA toolkit.
+  0. Training Dataset (ImageNet-Vid) if needed.
+  
+### Online Tracking
 
-1. Run test
+**Pretrained Models**
+If you only run the tracker, you can use the pretrained models: 
+[RT-MDNet-ImageNet-pretrained](dropbox)
 
-2. Train model
+**Demo**
 
-3. Pre-trained model
-
+### Learning RT-MDNet
+**Preparing Datasets**
+  0. If you download ImageNet-Vid dataset, you run 'modules/prepro_data_imagenet.py' to parse meta-data from dataset. After that, 'imagenet_refine.pkl' is generized.
+  0. type the path of 'imagenet_refine.pkl' in 'train_mrcnn.py'
+**Demo**
+  0. Run 'train_mrcnn.py' after hyper-parameter tuning suitable to the capacity of your system.
+  
