@@ -12,7 +12,7 @@ If you're using this code in a publication, please cite our paper.
 	@InProceedings{rtmdnet,
 	author = {Jung, Ilchae and Son, Jeany and Baek, Mooyeol and Han, Bohyung},
 	title = {Real-Time MDNet},
-	booktitle = {The IEEE European Conference on Computer Vision (ECCV)},
+	booktitle = {European Conference on Computer Vision (ECCV)},
 	month = {Sept},
 	year = {2018}
 	}
@@ -34,9 +34,10 @@ This code is tested on 64 bit Linux (Ubuntu 16.04 LTS).
 
 **Pretrained Models**
 If you only run the tracker, you can use the pretrained models: 
-[RT-MDNet-ImageNet-pretrained](dropbox)
+[RT-MDNet-ImageNet-pretrained](https://www.dropbox.com/s/lr8uft05zlo21an/rt-mdnet.pth?dl=0)
 
 **Demo**
+   0. Run 'Run.py'.
 
 ### Learning RT-MDNet
 **Preparing Datasets**
