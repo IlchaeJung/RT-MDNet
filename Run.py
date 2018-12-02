@@ -216,8 +216,8 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     parser.add_argument("-set_type", default = 'OTB' )
-    parser.add_argument("-model_path", default = './models/imagenet-vgg-m.mat')
-    parser.add_argument("-result_path", default = './result.pth')
+    parser.add_argument("-model_path", default = './models/rt-mdnet.pth')
+    parser.add_argument("-result_path", default = './result.npy')
     parser.add_argument("-visual_log",default=False, action= 'store_true')
     parser.add_argument("-visualize",default=False, action='store_true')
     parser.add_argument("-adaptive_align",default=True, action='store_false')
