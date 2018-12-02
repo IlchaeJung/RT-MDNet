@@ -120,9 +120,10 @@ if __name__ == "__main__":
 
         enable_frameNum = 0.
         for iidx in range(len(iou_result)):
-            if (math.isnan(iou_result[iidx])==False):
+            if (math.isnan(iou_result[iidx])==False): 
                 enable_frameNum += 1.
             else:
+                ## gt is not alowed
                 iou_result[iidx] = 0.
 
         iou_list.append(iou_result.sum()/enable_frameNum)
