@@ -30,7 +30,7 @@ This code is tested on 64 bit Linux (Ubuntu 16.04 LTS).
 ### Online Tracking
 
 **Pretrained Model and results**
-If you only run the tracker, you can use the pretrained models: 
+If you only run the tracker, you can use the pretrained model: 
 [RT-MDNet-ImageNet-pretrained](https://www.dropbox.com/s/lr8uft05zlo21an/rt-mdnet.pth?dl=0).
 Also, results from pretrained model are provided in [here](https://www.dropbox.com/s/pefp4dqjwjows3z/RT-MDNet%20Results.zip?dl=0).
 
