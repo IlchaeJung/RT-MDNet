@@ -34,7 +34,6 @@ def genConfig(seq_path, set_type):
     path, seqname = os.path.split(seq_path)
 
     if set_type == 'OTB':
-        ############################################  have to refine #############################################
         img_list = sorted([seq_path + '/img/' + p for p in os.listdir(seq_path + '/img') if os.path.splitext(p)[1] == '.jpg'])
 
         if (seqname == 'Jogging') or (seqname == 'Skating2'):
