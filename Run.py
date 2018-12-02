@@ -39,7 +39,7 @@ def genConfig(seq_path, set_type):
 
         if seqname == 'David':
             img_list = img_list[299:]
-            # gt = gt[300:,:]
+          
         if seqname == 'Football1':
             img_list = img_list[0:74]
         if seqname == 'Freeman3':
