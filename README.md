@@ -4,7 +4,7 @@ Created by [Ilchae Jung](http://cvlab.postech.ac.kr/~chey0313), [Jeany Son](http
 
 ### Introduction
 RT-MDNet is the real-time extension of [MDNet](http://cvlab.postech.ac.kr/research/mdnet/) and is the state-of-the-art real-time tracker.
-Detailed description of the system is provided by our [paper](https://arxiv.org/pdf/1808.08834.pdf)
+Detailed description of the system is provided by our [project page](http://cvlab.postech.ac.kr/~chey0313/real_time_mdnet/) and [paper](https://arxiv.org/pdf/1808.08834.pdf)
 
 ### Citation
 If you're using this code in a publication, please cite our paper.
