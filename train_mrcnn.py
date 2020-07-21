@@ -186,7 +186,6 @@ def train_mdnet():
             ## inter frame classification
 
             interclass_label = Variable(torch.zeros((pos_score.size(0))).long())
-            interclass_label[0] = 1
             if opts['use_gpu']:
                 interclass_label = interclass_label.cuda()
             total_interclass_score = pos_score[:,1].contiguous()
